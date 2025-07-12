@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QCalendarWidget, QVBoxLayout,
-    QHBoxLayout, QPushButton, QLabel, QScrollArea, QFrame
+    QHBoxLayout, QPushButton, QLabel, QScrollArea, QFrame, QMessageBox
 )
 from PySide6.QtCore import QDate, Qt
 from windows.add_task_window import AddTaskWindow
@@ -70,12 +70,36 @@ class MainWindow(QMainWindow):
         if not block.layout():
             block.setLayout(QVBoxLayout())
 
-        label = QLabel(f"📌 {task.title}")
-        label.setStyleSheet("background-color: lightblue; padding: 6px 8px; border-radius: 6px;")
+        # Xóa widget cũ nếu tồn tại
+        for i in reversed(range(block.layout().count())):
+            if block.layout().itemAt(i).widget():
+                block.layout().itemAt(i).widget().deleteLater()
+
+        # Tạo label mới với trạng thái hoàn thành
+        label = QLabel(f"📌 {task.title}" if not task.completed else f"<s>📌 {task.title}</s>")
+        
+        # Thiết lập style dựa trên trạng thái hoàn thành
+        if task.completed:
+            label.setStyleSheet("""
+                background-color: #c8e6c9;  /* Màu xanh lá nhạt */
+                padding: 6px 8px;
+                border-radius: 6px;
+                text-decoration: line-through;
+                color: #666;
+            """)
+        else:
+            label.setStyleSheet("""
+                background-color: #bbdefb;  /* Màu xanh dương nhạt */
+                padding: 6px 8px;
+                border-radius: 6px;
+            """)
+        
         label.setCursor(Qt.PointingHandCursor)
 
         def open_detail():
             detail_window = TaskDetailWindow(task, self)
+            detail_window.task_updated.connect(self.handle_task_updated)  # Kết nối signal cập nhật
+            detail_window.task_deleted.connect(self.handle_task_deleted)  # Kết nối signal xóa
             detail_window.exec()
 
         label.mousePressEvent = lambda e: open_detail()
@@ -103,3 +127,37 @@ class MainWindow(QMainWindow):
     def handle_new_task(self, task: Task):
         self.db.add_task(task, self.selected_date)
         self.display_task(task)
+    
+    # main_window.py (add these methods to the MainWindow class)
+    def handle_task_updated(self, task: Task):
+        self.db.update_task(task, self.selected_date)
+        # Load lại toàn bộ tasks để cập nhật giao diện
+        self.load_tasks_for_day(QDate.fromString(self.selected_date.isoformat(), "yyyy-MM-dd"))
+
+    def handle_task_deleted(self, task_id: int):
+        self.db.delete_task(task_id)
+        self.load_tasks_for_day(QDate.fromString(self.selected_date.isoformat(), "yyyy-MM-dd"))
+
+    def display_task(self, task: Task):
+        start_hour = task.start_time.hour
+        block = self.hour_blocks[start_hour]
+        if not block.layout():
+            block.setLayout(QVBoxLayout())
+
+        label = QLabel(f"📌 {task.title}")
+        if task.completed:
+            label.setText(f"<s>📌 {task.title}</s>")
+            label.setStyleSheet("background-color: lightgreen; padding: 6px 8px; border-radius: 6px; text-decoration: line-through;")
+        else:
+            label.setStyleSheet("background-color: lightblue; padding: 6px 8px; border-radius: 6px;")
+        
+        label.setCursor(Qt.PointingHandCursor)
+
+        def open_detail():
+            detail_window = TaskDetailWindow(task, self)
+            detail_window.task_updated.connect(self.handle_task_updated)
+            detail_window.task_deleted.connect(self.handle_task_deleted)
+            detail_window.exec()
+
+        label.mousePressEvent = lambda e: open_detail()
+        block.layout().addWidget(label)

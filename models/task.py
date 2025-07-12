@@ -7,3 +7,5 @@ class Task:
     start_time: time
     end_time: time
     description: str = ""
+    completed: bool = False
+    id: int = None  # Add this to track task ID

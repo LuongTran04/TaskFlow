@@ -1,8 +1,9 @@
+# add_task_window.py
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QLabel, QLineEdit,
     QTimeEdit, QTextEdit, QPushButton, QHBoxLayout
 )
-from PySide6.QtCore import QTime, Signal
+from PySide6.QtCore import QTime, Signal, Qt  # Thêm Qt vào imports
 from models.task import Task
 
 class AddTaskWindow(QDialog):
@@ -17,6 +18,7 @@ class AddTaskWindow(QDialog):
 
         layout.addWidget(QLabel("📝 Task Name:"))
         self.title_input = QLineEdit()
+        self.title_input.setFocusPolicy(Qt.StrongFocus)  # Thêm dòng này
         layout.addWidget(self.title_input)
 
         layout.addWidget(QLabel("🕒 Start Time:"))
@@ -33,6 +35,7 @@ class AddTaskWindow(QDialog):
 
         layout.addWidget(QLabel("📄 Description:"))
         self.desc_input = QTextEdit()
+        self.desc_input.setFocusPolicy(Qt.StrongFocus)  # Thêm dòng này
         layout.addWidget(self.desc_input)
 
         button_layout = QHBoxLayout()
