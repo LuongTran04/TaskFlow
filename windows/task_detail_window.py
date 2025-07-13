@@ -16,32 +16,32 @@ class TaskDetailWindow(QDialog):
         layout = QVBoxLayout()
         
         # Task title with strike-through if completed
-        title_label = QLabel(f"<b>📝 {task.title}</b>")
+        title_label = QLabel(f"<b>Task name: {task.title}</b>")
         if task.completed:
-            title_label.setText(f"<b><s>📝 {task.title}</s></b>")
+            title_label.setText(f"<b><s>{task.title}</s></b>")
         layout.addWidget(title_label)
         
-        layout.addWidget(QLabel(f"🕒 {task.start_time.strftime('%H:%M')} → {task.end_time.strftime('%H:%M')}"))
-        desc = QLabel(task.description or "(No description)")
+        layout.addWidget(QLabel(f"Duration: {task.start_time.strftime('%H:%M')} → {task.end_time.strftime('%H:%M')}"))
+        desc = QLabel(f"Description: {task.description or '(No description)'}")
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
         # Status label
-        status_label = QLabel("✅ Completed" if task.completed else "❌ Not completed")
+        status_label = QLabel("Completed" if task.completed else "Not completed")
         layout.addWidget(status_label)
 
         # Buttons layout
         buttons_layout = QHBoxLayout()
         
-        self.edit_btn = QPushButton("✏️ Edit")
+        self.edit_btn = QPushButton("Edit")
         self.edit_btn.clicked.connect(self.edit_task)
         buttons_layout.addWidget(self.edit_btn)
         
-        self.delete_btn = QPushButton("🗑️ Delete")
+        self.delete_btn = QPushButton("Delete")
         self.delete_btn.clicked.connect(self.confirm_delete)
         buttons_layout.addWidget(self.delete_btn)
-        
-        self.toggle_btn = QPushButton("✅ Mark Done" if not task.completed else "❌ Mark Undone")
+
+        self.toggle_btn = QPushButton("Mark Done" if not task.completed else "Mark Undone")
         self.toggle_btn.clicked.connect(self.toggle_completion)
         buttons_layout.addWidget(self.toggle_btn)
         
@@ -83,14 +83,14 @@ class TaskDetailWindow(QDialog):
 
     def update_task_display(self):
         # Cập nhật nút
-        self.toggle_btn.setText("✅ Mark Done" if not self.task.completed else "❌ Mark Undone")
+        self.toggle_btn.setText("Mark Done" if not self.task.completed else "Mark Undone")
         
         # Cập nhật trạng thái hoàn thành
         for i in range(self.layout().count()):
             widget = self.layout().itemAt(i).widget()
-            if isinstance(widget, QLabel) and "📝" in widget.text():
+            if isinstance(widget, QLabel) and widget.text().startswith("<b>"):
                 if self.task.completed:
-                    widget.setText(f"<b><s>📝 {self.task.title}</s></b>")
+                    widget.setText(f"<b><s>{self.task.title}</s></b>")
                 else:
-                    widget.setText(f"<b>📝 {self.task.title}</b>")
+                    widget.setText(f"<b>{self.task.title}</b>")
                 break

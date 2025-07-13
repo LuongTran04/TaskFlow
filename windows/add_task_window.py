@@ -16,24 +16,24 @@ class AddTaskWindow(QDialog):
 
         layout = QVBoxLayout()
 
-        layout.addWidget(QLabel("📝 Task Name:"))
+        layout.addWidget(QLabel("Task Name:"))
         self.title_input = QLineEdit()
         self.title_input.setFocusPolicy(Qt.StrongFocus)  # Thêm dòng này
         layout.addWidget(self.title_input)
 
-        layout.addWidget(QLabel("🕒 Start Time:"))
+        layout.addWidget(QLabel("Start Time:"))
         self.start_time_input = QTimeEdit()
         self.start_time_input.setDisplayFormat("HH:mm")
         self.start_time_input.setTime(QTime.currentTime())
         layout.addWidget(self.start_time_input)
 
-        layout.addWidget(QLabel("🕒 End Time:"))
+        layout.addWidget(QLabel("End Time:"))
         self.end_time_input = QTimeEdit()
         self.end_time_input.setDisplayFormat("HH:mm")
         self.end_time_input.setTime(QTime.currentTime().addSecs(3600))
         layout.addWidget(self.end_time_input)
 
-        layout.addWidget(QLabel("📄 Description:"))
+        layout.addWidget(QLabel("Description:"))
         self.desc_input = QTextEdit()
         self.desc_input.setFocusPolicy(Qt.StrongFocus)  # Thêm dòng này
         layout.addWidget(self.desc_input)

@@ -17,40 +17,38 @@ class EditTaskWindow(QDialog):
 
         layout = QVBoxLayout()
 
-        layout.addWidget(QLabel("📝 Task Name:"))
+        layout.addWidget(QLabel("Task Name:"))
         self.title_input = QLineEdit(task.title)
         layout.addWidget(self.title_input)
 
-        layout.addWidget(QLabel("🕒 Start Time:"))
+        layout.addWidget(QLabel("Start Time:"))
         self.start_time_input = QTimeEdit()
         self.start_time_input.setDisplayFormat("HH:mm")
         self.start_time_input.setTime(QTime(task.start_time.hour, task.start_time.minute))
         layout.addWidget(self.start_time_input)
 
-        layout.addWidget(QLabel("🕒 End Time:"))
+        layout.addWidget(QLabel("End Time:"))
         self.end_time_input = QTimeEdit()
         self.end_time_input.setDisplayFormat("HH:mm")
         self.end_time_input.setTime(QTime(task.end_time.hour, task.end_time.minute))
         layout.addWidget(self.end_time_input)
 
-        layout.addWidget(QLabel("📄 Description:"))
+        layout.addWidget(QLabel("Description:"))
         self.desc_input = QTextEdit(task.description)
         layout.addWidget(self.desc_input)
 
         # Completion status checkbox
         self.completed_checkbox = QCheckBox("Completed")
-        self.completed_checkbox.setChecked(task.completed)
-        layout.addWidget(self.completed_checkbox)
+        self.completed_checkbox.setChecked(task.completed) 
 
         button_layout = QHBoxLayout()
-        save_btn = QPushButton("💾 Save Changes")
+        save_btn = QPushButton("Save Changes")
         save_btn.clicked.connect(self.update_task)
         cancel_btn = QPushButton("Cancel")
         cancel_btn.clicked.connect(self.reject)
         button_layout.addWidget(save_btn)
         button_layout.addWidget(cancel_btn)
         layout.addLayout(button_layout)
-
         self.setLayout(layout)
 
     def update_task(self):
@@ -58,15 +56,14 @@ class EditTaskWindow(QDialog):
         start_time = self.start_time_input.time().toPython()
         end_time = self.end_time_input.time().toPython()
         description = self.desc_input.toPlainText().strip()
-        completed = self.completed_checkbox.isChecked()
+        
 
         if title and start_time < end_time:
             self.task.title = title
             self.task.start_time = start_time
             self.task.end_time = end_time
             self.task.description = description
-            self.task.completed = completed
             self.task_updated.emit(self.task)
             self.accept()
         else:
-            self.setWindowTitle("⚠️ Please check your input!")
+            self.setWindowTitle("Please check your input!")

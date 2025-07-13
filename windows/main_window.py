@@ -76,8 +76,8 @@ class MainWindow(QMainWindow):
                 block.layout().itemAt(i).widget().deleteLater()
 
         # Tạo label mới với trạng thái hoàn thành
-        label = QLabel(f"📌 {task.title}" if not task.completed else f"<s>📌 {task.title}</s>")
-        
+        label = QLabel(f"{task.title}" if not task.completed else f"<s>{task.title}</s>")
+
         # Thiết lập style dựa trên trạng thái hoàn thành
         if task.completed:
             label.setStyleSheet("""
@@ -144,9 +144,9 @@ class MainWindow(QMainWindow):
         if not block.layout():
             block.setLayout(QVBoxLayout())
 
-        label = QLabel(f"📌 {task.title}")
+        label = QLabel(f"{task.title}")
         if task.completed:
-            label.setText(f"<s>📌 {task.title}</s>")
+            label.setText(f"<s>{task.title}</s>")
             label.setStyleSheet("background-color: lightgreen; padding: 6px 8px; border-radius: 6px; text-decoration: line-through;")
         else:
             label.setStyleSheet("background-color: lightblue; padding: 6px 8px; border-radius: 6px;")
