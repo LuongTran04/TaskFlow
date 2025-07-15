@@ -1,10 +1,12 @@
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QCalendarWidget, QVBoxLayout,
-    QHBoxLayout, QPushButton, QLabel, QScrollArea, QFrame, QMessageBox
+    QHBoxLayout, QLabel, QScrollArea, QFrame, QToolButton, QStyle
 )
 from PySide6.QtCore import QDate, Qt
+from PySide6.QtGui import QTextCharFormat, QFont, QColor
+from qfluentwidgets import PrimaryPushButton
 from windows.add_task_window import AddTaskWindow
-from models.task import Task 
+from models.task import Task
 from database.db_manager import DBManager
 from windows.task_detail_window import TaskDetailWindow
 
@@ -22,39 +24,91 @@ class MainWindow(QMainWindow):
         self.calendar = QCalendarWidget()
         self.calendar.setGridVisible(True)
         self.calendar.clicked.connect(self.load_tasks_for_day)
+        
+        self.customize_calendar()
 
-        self.hourly_view = self.create_hourly_view()
-        self.add_task_btn = QPushButton("➕ Add Task")
+        self.right_layout = QVBoxLayout()
+        
+        self.add_task_btn = PrimaryPushButton("Add Task")
         self.add_task_btn.clicked.connect(self.open_add_task_window)
+        
+        self.hourly_view = self.create_hourly_view()
 
-        right_layout = QVBoxLayout()
-        right_layout.addWidget(self.add_task_btn)
-        right_layout.addWidget(self.hourly_view)
+        self.right_layout.addWidget(self.add_task_btn)
+        self.right_layout.addWidget(self.hourly_view)
 
         main_layout.addWidget(self.calendar, 2)
-        main_layout.addLayout(right_layout, 3)
+        main_layout.addLayout(self.right_layout, 3)
 
         self.setCentralWidget(main_widget)
         self.selected_date = self.calendar.selectedDate().toPython()
         self.load_tasks_for_day(self.calendar.selectedDate())
 
+    def customize_calendar(self):
+        """Hàm tập hợp các tùy chỉnh cho QCalendarWidget."""
+        
+        # Ẩn cột hiển thị số tuần 
+        self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+
+        style = self.style()
+        left_arrow_icon = style.standardIcon(QStyle.StandardPixmap.SP_ArrowLeft)
+        right_arrow_icon = style.standardIcon(QStyle.StandardPixmap.SP_ArrowRight)
+        
+        prev_button = self.calendar.findChild(QToolButton, "qt_calendar_prevmonth")
+        next_button = self.calendar.findChild(QToolButton, "qt_calendar_nextmonth")
+        
+        if prev_button:
+            prev_button.setIcon(left_arrow_icon)
+        if next_button:
+            next_button.setIcon(right_arrow_icon)
+
+        stylesheet = """
+            QCalendarWidget QTableView { 
+                gridline-color: transparent; 
+                outline: 0px;
+            }
+            
+            QCalendarWidget QWidget#qt_calendar_navigationbar { 
+                background-color: #B2EBF2;
+            }
+
+            QCalendarWidget QToolButton, QCalendarWidget QLabel#qt_calendar_monthbutton, QCalendarWidget QLabel#qt_calendar_yearbutton {
+                color: #333333;
+            }
+            
+            QCalendarWidget QAbstractItemView:item:selected {
+                background-color: #E0F7FA;
+                color: #212121;
+            }
+        """
+        self.calendar.setStyleSheet(stylesheet)
+
+        today = QDate.currentDate()
+        fmt = QTextCharFormat()
+        fmt.setBackground(QColor("#F5F5F5"))
+        fmt.setFontWeight(QFont.Bold)
+        self.calendar.setDateTextFormat(today, fmt)
+        
     def create_hourly_view(self):
         scroll = QScrollArea()
         container = QWidget()
         layout = QVBoxLayout(container)
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.hour_blocks = []
 
         for hour in range(24):
             block_frame = QFrame()
-            block_frame.setFixedHeight(60)
-            block_frame.setStyleSheet("QFrame { border-bottom: 1px solid #888; }")
+            block_frame.setMinimumHeight(60)
+            block_frame.setStyleSheet("QFrame { border-bottom: 1px solid #e0e0e0; }")
             block_layout = QVBoxLayout(block_frame)
+            block_layout.setAlignment(Qt.AlignTop)
             block_layout.setContentsMargins(50, 5, 5, 5)
             block_layout.setSpacing(5)
 
             time_label = QLabel(f"{hour:02d}:00", block_frame)
-            time_label.setStyleSheet("color: black;")
+            time_label.setStyleSheet("color: #606060;")
             time_label.move(5, 5)
 
             layout.addWidget(block_frame)
@@ -64,56 +118,15 @@ class MainWindow(QMainWindow):
         scroll.setWidget(container)
         return scroll
 
-    def display_task(self, task: Task):
-        start_hour = task.start_time.hour
-        block = self.hour_blocks[start_hour]
-        if not block.layout():
-            block.setLayout(QVBoxLayout())
-
-        # Xóa widget cũ nếu tồn tại
-        for i in reversed(range(block.layout().count())):
-            if block.layout().itemAt(i).widget():
-                block.layout().itemAt(i).widget().deleteLater()
-
-        # Tạo label mới với trạng thái hoàn thành
-        label = QLabel(f"{task.title}" if not task.completed else f"<s>{task.title}</s>")
-
-        # Thiết lập style dựa trên trạng thái hoàn thành
-        if task.completed:
-            label.setStyleSheet("""
-                background-color: #c8e6c9;  /* Màu xanh lá nhạt */
-                padding: 6px 8px;
-                border-radius: 6px;
-                text-decoration: line-through;
-                color: #666;
-            """)
-        else:
-            label.setStyleSheet("""
-                background-color: #bbdefb;  /* Màu xanh dương nhạt */
-                padding: 6px 8px;
-                border-radius: 6px;
-            """)
-        
-        label.setCursor(Qt.PointingHandCursor)
-
-        def open_detail():
-            detail_window = TaskDetailWindow(task, self)
-            detail_window.task_updated.connect(self.handle_task_updated)  # Kết nối signal cập nhật
-            detail_window.task_deleted.connect(self.handle_task_deleted)  # Kết nối signal xóa
-            detail_window.exec()
-
-        label.mousePressEvent = lambda e: open_detail()
-        block.layout().addWidget(label)
-
     def load_tasks_for_day(self, qdate: QDate):
         self.selected_date = qdate.toPython()
 
-        for block in self.hour_blocks:
-            if block.layout():
-                while block.layout().count():
-                    item = block.layout().takeAt(0)
-                    if item.widget():
-                        item.widget().deleteLater()
+        if self.hourly_view:
+            self.hourly_view.setParent(None)
+            self.hourly_view.deleteLater()
+
+        self.hourly_view = self.create_hourly_view()
+        self.right_layout.addWidget(self.hourly_view)
 
         tasks = self.db.get_tasks_by_date(self.selected_date)
         for task in tasks:
@@ -121,35 +134,43 @@ class MainWindow(QMainWindow):
 
     def open_add_task_window(self):
         dialog = AddTaskWindow(self)
-        dialog.task_created.connect(self.handle_new_task)
-        dialog.exec()
-    
+        if dialog.exec():
+            task = dialog.get_task_data()
+            if task:
+                self.handle_new_task(task)
+
     def handle_new_task(self, task: Task):
         self.db.add_task(task, self.selected_date)
-        self.display_task(task)
+        self.load_tasks_for_day(self.calendar.selectedDate())
     
-    # main_window.py (add these methods to the MainWindow class)
     def handle_task_updated(self, task: Task):
-        self.db.update_task(task, self.selected_date)
-        # Load lại toàn bộ tasks để cập nhật giao diện
-        self.load_tasks_for_day(QDate.fromString(self.selected_date.isoformat(), "yyyy-MM-dd"))
+        self.db.update_task(task)
+        self.load_tasks_for_day(self.calendar.selectedDate())
 
     def handle_task_deleted(self, task_id: int):
         self.db.delete_task(task_id)
-        self.load_tasks_for_day(QDate.fromString(self.selected_date.isoformat(), "yyyy-MM-dd"))
+        self.load_tasks_for_day(self.calendar.selectedDate())
 
     def display_task(self, task: Task):
         start_hour = task.start_time.hour
         block = self.hour_blocks[start_hour]
-        if not block.layout():
-            block.setLayout(QVBoxLayout())
+        
+        layout = block.layout()
 
-        label = QLabel(f"{task.title}")
+        label = QLabel(f"{task.title}" if not task.completed else f"<s>{task.title}</s>")
+        label.setWordWrap(True)
+
         if task.completed:
-            label.setText(f"<s>{task.title}</s>")
-            label.setStyleSheet("background-color: lightgreen; padding: 6px 8px; border-radius: 6px; text-decoration: line-through;")
+            label.setStyleSheet("""
+                background-color: #E8F5E9; border: 1px solid #C8E6C9;
+                color: #555; padding: 6px 8px; border-radius: 4px;
+                text-decoration: line-through;
+            """)
         else:
-            label.setStyleSheet("background-color: lightblue; padding: 6px 8px; border-radius: 6px;")
+            label.setStyleSheet("""
+                background-color: #E3F2FD; border: 1px solid #BBDEFB;
+                padding: 6px 8px; border-radius: 4px;
+            """)
         
         label.setCursor(Qt.PointingHandCursor)
 
@@ -160,4 +181,4 @@ class MainWindow(QMainWindow):
             detail_window.exec()
 
         label.mousePressEvent = lambda e: open_detail()
-        block.layout().addWidget(label)
+        layout.addWidget(label)

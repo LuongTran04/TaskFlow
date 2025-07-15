@@ -27,7 +27,8 @@ class DBManager:
         INSERT INTO tasks (title, description, start_time, end_time, task_date, completed)
         VALUES (?, ?, ?, ?, ?, ?)
         """
-        cursor = self.conn.execute(query, (
+        cursor = self.conn.cursor()
+        cursor.execute(query, (
             task.title,
             task.description,
             task.start_time.strftime("%H:%M"),
@@ -36,29 +37,50 @@ class DBManager:
             int(task.completed)
         ))
         self.conn.commit()
-        return cursor.lastrowid  # Return the new task ID
+        return cursor.lastrowid
 
     def get_tasks_by_date(self, task_date: date) -> list[Task]:
+        """
+        Lấy tất cả các công việc cho một ngày cụ thể.
+        """
         query = "SELECT id, title, start_time, end_time, description, completed FROM tasks WHERE task_date = ?"
-        cursor = self.conn.execute(query, (task_date.isoformat(),))
+        cursor = self.conn.cursor()
+        cursor.execute(query, (task_date.isoformat(),))
         rows = cursor.fetchall()
 
         tasks = []
-        for task_id, title, start, end, desc, completed in rows:
-            start_time = datetime.strptime(start, "%H:%M").time()
-            end_time = datetime.strptime(end, "%H:%M").time()
-            task = Task(title, start_time, end_time, desc, bool(completed))
-            task.id = task_id
+        for row in rows:
+            task_id, title, start_str, end_str, desc, completed_int = row
+            
+            # Chuyển đổi dữ liệu từ database về đúng định dạng
+            start_time = datetime.strptime(start_str, "%H:%M").time()
+            end_time = datetime.strptime(end_str, "%H:%M").time()
+            
+            # --- THAY ĐỔI: Sử dụng keyword arguments để tạo Task, an toàn hơn ---
+            task = Task(
+                id=task_id,
+                title=title,
+                start_time=start_time,
+                end_time=end_time,
+                description=desc,
+                completed=bool(completed_int)
+            )
             tasks.append(task)
+            
         return tasks
 
-    def update_task(self, task: Task, task_date: date):
+    def update_task(self, task: Task):
+        """
+        Cập nhật một công việc đã có.
+        Đã loại bỏ tham số task_date không dùng đến.
+        """
         query = """
         UPDATE tasks 
         SET title = ?, description = ?, start_time = ?, end_time = ?, completed = ?
         WHERE id = ?
         """
-        self.conn.execute(query, (
+        cursor = self.conn.cursor()
+        cursor.execute(query, (
             task.title,
             task.description,
             task.start_time.strftime("%H:%M"),
@@ -70,7 +92,8 @@ class DBManager:
 
     def delete_task(self, task_id: int):
         query = "DELETE FROM tasks WHERE id = ?"
-        self.conn.execute(query, (task_id,))
+        cursor = self.conn.cursor()
+        cursor.execute(query, (task_id,))
         self.conn.commit()
 
     def close(self):
