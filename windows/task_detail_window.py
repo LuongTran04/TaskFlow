@@ -13,9 +13,7 @@ class TaskDetailWindow(QDialog):
         self.setWindowTitle("Task Details")
         self.task = task
         
-        # --- THAY ĐỔI 1: Tăng kích thước cửa sổ cha ---
         self.setMinimumSize(420, 280)
-        # ---------------------------------------------
         
         layout = QVBoxLayout(self)
 
@@ -64,9 +62,7 @@ class TaskDetailWindow(QDialog):
         content = "Are you sure you want to delete this task?"
         w = MessageDialog(title, content, self)
         
-        # --- THAY ĐỔI 2: Giảm kích thước hộp thoại con cho phù hợp ---
         w.setFixedSize(380, 190)
-        # -----------------------------------------------------------
 
         if w.exec():
             self.task_deleted.emit(self.task.id)

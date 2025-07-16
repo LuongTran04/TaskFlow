@@ -1,10 +1,24 @@
 import sqlite3
+import sys
+import os
 from datetime import datetime, date
 from models.task import Task
 
+def resource_path(relative_path):
+    """ Lấy đường dẫn tuyệt đối đến tài nguyên, hoạt động cho cả môi trường dev và PyInstaller. """
+    try:
+        # PyInstaller tạo một thư mục tạm và lưu đường dẫn trong _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 class DBManager:
     def __init__(self, db_name="taskflow.db"):
-        self.conn = sqlite3.connect(db_name)
+        db_path = resource_path(db_name)
+        self.conn = sqlite3.connect(db_path)
+
         self.create_table()
 
     def create_table(self):
@@ -40,9 +54,6 @@ class DBManager:
         return cursor.lastrowid
 
     def get_tasks_by_date(self, task_date: date) -> list[Task]:
-        """
-        Lấy tất cả các công việc cho một ngày cụ thể.
-        """
         query = "SELECT id, title, start_time, end_time, description, completed FROM tasks WHERE task_date = ?"
         cursor = self.conn.cursor()
         cursor.execute(query, (task_date.isoformat(),))
@@ -52,11 +63,9 @@ class DBManager:
         for row in rows:
             task_id, title, start_str, end_str, desc, completed_int = row
             
-            # Chuyển đổi dữ liệu từ database về đúng định dạng
             start_time = datetime.strptime(start_str, "%H:%M").time()
             end_time = datetime.strptime(end_str, "%H:%M").time()
             
-            # --- THAY ĐỔI: Sử dụng keyword arguments để tạo Task, an toàn hơn ---
             task = Task(
                 id=task_id,
                 title=title,
@@ -70,10 +79,6 @@ class DBManager:
         return tasks
 
     def update_task(self, task: Task):
-        """
-        Cập nhật một công việc đã có.
-        Đã loại bỏ tham số task_date không dùng đến.
-        """
         query = """
         UPDATE tasks 
         SET title = ?, description = ?, start_time = ?, end_time = ?, completed = ?

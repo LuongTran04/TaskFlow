@@ -3,11 +3,11 @@ from PySide6.QtWidgets import (
     QHBoxLayout, QLabel, QScrollArea, QFrame, QToolButton, QStyle
 )
 from PySide6.QtCore import QDate, Qt
-from PySide6.QtGui import QTextCharFormat, QFont, QColor
+from PySide6.QtGui import QTextCharFormat, QFont, QColor, QIcon
 from qfluentwidgets import PrimaryPushButton
 from windows.add_task_window import AddTaskWindow
 from models.task import Task
-from database.db_manager import DBManager
+from database.db_manager import DBManager, resource_path
 from windows.task_detail_window import TaskDetailWindow
 
 class MainWindow(QMainWindow):
@@ -16,6 +16,13 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Task Flow")
         self.setGeometry(100, 100, 1000, 600)
 
+        # Set icon cho ứng dụng
+        try:
+            icon_path = resource_path("TaskFlowLogo.ico") 
+            self.setWindowIcon(QIcon(icon_path))
+        except Exception as e:
+            print(f"Không tìm thấy file icon: {e}")
+    
         self.db = DBManager()
 
         main_widget = QWidget()
@@ -47,7 +54,6 @@ class MainWindow(QMainWindow):
     def customize_calendar(self):
         """Hàm tập hợp các tùy chỉnh cho QCalendarWidget."""
         
-        # Ẩn cột hiển thị số tuần 
         self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
 
         style = self.style()
@@ -91,7 +97,15 @@ class MainWindow(QMainWindow):
         
     def create_hourly_view(self):
         scroll = QScrollArea()
+        
+        scroll.setWidgetResizable(True) 
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setStyleSheet("QScrollArea { background-color: transparent; border: none; }")
+        # --------------------------------------------------------
+
         container = QWidget()
+        # Không cần đặt style cho container nữa
+        
         layout = QVBoxLayout(container)
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -101,14 +115,17 @@ class MainWindow(QMainWindow):
         for hour in range(24):
             block_frame = QFrame()
             block_frame.setMinimumHeight(60)
-            block_frame.setStyleSheet("QFrame { border-bottom: 1px solid #e0e0e0; }")
+            
+            # Đã xóa các dòng vẽ đường kẻ theo yêu cầu
+            
             block_layout = QVBoxLayout(block_frame)
             block_layout.setAlignment(Qt.AlignTop)
             block_layout.setContentsMargins(50, 5, 5, 5)
             block_layout.setSpacing(5)
 
             time_label = QLabel(f"{hour:02d}:00", block_frame)
-            time_label.setStyleSheet("color: #606060;")
+            # Thêm background-color: transparent để time_label không bị ảnh hưởng
+            time_label.setStyleSheet("color: #606060; background-color: transparent;")
             time_label.move(5, 5)
 
             layout.addWidget(block_frame)
@@ -167,7 +184,7 @@ class MainWindow(QMainWindow):
                 text-decoration: line-through;
             """)
         else:
-            label.setStyleSheet("""
+            label.setStyleSheet(""" 
                 background-color: #E3F2FD; border: 1px solid #BBDEFB;
                 padding: 6px 8px; border-radius: 4px;
             """)
