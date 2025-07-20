@@ -10,11 +10,11 @@ def main():
     app = QApplication(sys.argv)
 
     # Thiết lập icon cho ứng dụng trên Windows
-    if sys.platform == 'win32':
+    if sys.platform == 'win32':     
         app_id = 'LuongTran.TaskFlow.1.0' # Tên định danh tùy ý
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
-    setTheme(Theme.LIGHT if isDarkTheme() else Theme.LIGHT)
+    setTheme(Theme.LIGHT)
 
     window = MainWindow()
     window.show()
