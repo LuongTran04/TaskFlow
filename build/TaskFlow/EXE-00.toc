@@ -1,5 +1,5 @@
 ('C:\\TaskFlowCalendarBlocking\\build\\TaskFlow\\TaskFlow.exe',
- False,
+ True,
  False,
  True,
  ['C:\\TaskFlowCalendarBlocking\\TaskFlowLogo.ico'],
@@ -68,8 +68,8 @@
  [],
  False,
  False,
- 1753173682,
- [('runw.exe',
-   'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
+ 1753180576,
+ [('run.exe',
+   'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')],
  'C:\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python312\\python312.dll')

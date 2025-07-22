@@ -1,18 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
 
-# Đây là file cấu hình cho PyInstaller.
-# Nó sẽ tạo ra một thư mục chứa cả 2 file: TaskFlow.exe và notifier.exe.
+# --- Bước 1: Định nghĩa các file dữ liệu chung ---
+# Các file này (database, icon) sẽ được thêm vào cho cả hai file .exe
+common_datas = [
+    ('taskflow.db', '.'),
+    ('TaskFlowLogo.ico', '.')
+]
 
-# Phân tích cho ứng dụng giao diện chính (main.py)
+# --- Bước 2: Phân tích và tạo file TaskFlow.exe (Giao diện chính) ---
+# 'a' là một biến chứa kết quả phân tích file main.py
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('taskflow.db', '.'),
-        ('TaskFlowLogo.ico', '.')
+    datas=common_datas,
+    hiddenimports=[
+        'plyer.platforms.win.notification',
+        'win32com',
+        'psutil'
     ],
-    hiddenimports=['plyer.platforms.win.notification', 'win32com', 'psutil'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -22,9 +28,10 @@ a = Analysis(
     cipher=None,
     noarchive=False,
 )
+# pyz_main chứa các module Python đã được nén lại
 pyz_main = PYZ(a.pure, a.zipped_data, cipher=None)
 
-# Tạo file thực thi cho giao diện chính
+# exe_main là đối tượng định nghĩa cách tạo ra file TaskFlow.exe
 exe_main = EXE(
     pyz_main,
     a.scripts,
@@ -35,20 +42,18 @@ exe_main = EXE(
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
-    console=False,  # False = Ứng dụng không có cửa sổ dòng lệnh
+    console=True,  # False = Chạy không có cửa sổ dòng lệnh
     icon='TaskFlowLogo.ico',
 )
 
-# Phân tích cho dịch vụ thông báo (notifier.py)
+# --- Bước 3: Phân tích và tạo file notifier.exe (Chạy nền) ---
+# 'b' là một biến chứa kết quả phân tích file notifier.py
 b = Analysis(
     ['notifier.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('taskflow.db', '.'),
-        ('TaskFlowLogo.ico', '.')
-    ],
-    hiddenimports=['plyer.platforms.win.notification'], # Quan trọng để plyer hoạt động
+    datas=common_datas,
+    hiddenimports=['plyer.platforms.win.notification'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -58,9 +63,10 @@ b = Analysis(
     cipher=None,
     noarchive=False,
 )
+# pyz_notifier chứa các module Python đã được nén lại cho notifier
 pyz_notifier = PYZ(b.pure, b.zipped_data, cipher=None)
 
-# Tạo file thực thi cho dịch vụ thông báo
+# exe_notifier là đối tượng định nghĩa cách tạo ra file notifier.exe
 exe_notifier = EXE(
     pyz_notifier,
     b.scripts,
@@ -74,7 +80,9 @@ exe_notifier = EXE(
     console=False, # False = Chạy ẩn, không có cửa sổ dòng lệnh
 )
 
-# Gom tất cả lại vào một thư mục duy nhất
+# --- Bước 4: Gom tất cả lại vào một thư mục ---
+# 'coll' là đối tượng cuối cùng, nó lấy kết quả từ exe_main và exe_notifier
+# và đặt chúng vào một thư mục duy nhất.
 coll = COLLECT(
     exe_main,
     exe_notifier,
