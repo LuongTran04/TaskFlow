@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "7AlPZdpEiwI=",
+  "success": true,
+  "projectFilePath": "C:\\TaskFlowCalendarBlocking\\TaskFlowPackage\\TaskFlowPackage\\TaskFlowPackage.wapproj",
+  "expectedPackageFiles": [
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages\\microsoft.windows.sdk.buildtools\\10.0.26100.1742\\microsoft.windows.sdk.buildtools.10.0.26100.1742.nupkg.sha512"
+  ],
+  "logs": []
+}

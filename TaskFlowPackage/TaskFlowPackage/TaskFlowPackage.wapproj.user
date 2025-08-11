@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Source>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</Source>
+    <SmallTileSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</SmallTileSource>
+    <MediumTileSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</MediumTileSource>
+    <WideTileSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</WideTileSource>
+    <LargeTileSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</LargeTileSource>
+    <AppIconSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</AppIconSource>
+    <SplashScreenSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</SplashScreenSource>
+    <PackageLogoSource>C:\TaskFlowCalendarBlocking\TaskFlowLogo.png</PackageLogoSource>
+    <UapAppxPackageBuildMode>SideloadOnly</UapAppxPackageBuildMode>
+    <AppxShowAllApps>False</AppxShowAllApps>
+    <AppxBuildConfigurationSelection>neutral</AppxBuildConfigurationSelection>
+    <PackageOptionalProjectsInIdeBuilds>False</PackageOptionalProjectsInIdeBuilds>
+  </PropertyGroup>
+</Project>
