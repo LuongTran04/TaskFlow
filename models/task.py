@@ -9,3 +9,4 @@ class Task:
     description: str = ""
     completed: bool = False
     id: int = None 
+    notification_time: int = 30

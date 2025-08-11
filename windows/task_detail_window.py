@@ -15,9 +15,7 @@ class TaskDetailWindow(QDialog):
         # Thiết lập các thuộc tính cơ bản cho cửa sổ
         self.setWindowTitle("Task Details")
         self.task = task
-        self.setMinimumSize(400, 200)
-        
-        # --- BỐ CỤC GIAO DIỆN ---
+        self.setMinimumSize(400, 0)
 
         # Tạo layout chính theo chiều dọc cho toàn bộ cửa sổ
         main_layout = QVBoxLayout(self)
@@ -53,10 +51,12 @@ class TaskDetailWindow(QDialog):
         self.duration_label = BodyLabel()
         self.desc_label = BodyLabel()
         self.desc_label.setWordWrap(True)
+        self.notification_label = BodyLabel()
 
         # Thêm các nhãn vào layout body
         body_layout.addWidget(self.duration_label)   
         body_layout.addWidget(self.desc_label)
+        body_layout.addWidget(self.notification_label)
 
         # Chứa các nút hành động (Edit, Delete)
         footer_layout = QHBoxLayout()
@@ -145,6 +145,7 @@ class TaskDetailWindow(QDialog):
         # Cập nhật lại các nhãn thông tin khác
         self.duration_label.setText(f"Time: {self.task.start_time.strftime('%H:%M')} → {self.task.end_time.strftime('%H:%M')}")
         self.desc_label.setText(f"Description: {self.task.description}" or 'No description provided.')
+        self.notification_label.setText(f"Notification: {self.task.notification_time} minutes before end time.")
         
         # Đảm bảo trạng thái của nút gạt luôn khớp với dữ liệu
         self.completion_switch.setChecked(self.task.completed)

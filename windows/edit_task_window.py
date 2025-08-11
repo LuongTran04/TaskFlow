@@ -2,7 +2,7 @@ from PySide6.QtCore import QTime, Signal
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout
 from models.task import Task
 from qfluentwidgets import (LineEdit, TimeEdit, TextEdit, PushButton, 
-                            PrimaryPushButton, CheckBox, BodyLabel, MessageDialog) # Thêm MessageDialog vào import
+                            PrimaryPushButton, BodyLabel, MessageDialog, SpinBox) 
 
 class EditTaskWindow(QDialog):
     # Tạo một tín hiệu (signal) để thông báo cho cửa sổ chính khi một task đã được cập nhật
@@ -50,6 +50,14 @@ class EditTaskWindow(QDialog):
         self.desc_input.setText(task.description)
         layout.addWidget(self.desc_input)
 
+        # Ô nhập thời gian thông báo 
+        layout.addWidget(BodyLabel("Notify me (minutes before end time):"))
+        self.notification_time_input = SpinBox()
+        self.notification_time_input.setRange(0, 1440)
+        # Đặt giá trị hiện tại của task vào ô
+        self.notification_time_input.setValue(task.notification_time)
+        layout.addWidget(self.notification_time_input)
+
         # Tạo layout ngang cho các nút bấm
         button_layout = QHBoxLayout()
         self.save_btn = PrimaryPushButton("Save Changes")
@@ -85,6 +93,7 @@ class EditTaskWindow(QDialog):
         self.task.start_time = start_time.toPython()
         self.task.end_time = end_time.toPython()
         self.task.description = self.desc_input.toPlainText().strip()
+        self.task.notification_time = self.notification_time_input.value()
         
         # Phát tín hiệu báo cho cửa sổ chính biết rằng task đã được cập nhật
         self.task_updated.emit(self.task)

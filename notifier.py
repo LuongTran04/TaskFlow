@@ -24,12 +24,8 @@ CHECK_INTERVAL_SECONDS = 60  # Khoảng thời gian kiểm tra lại, tính bằ
 NOTIFY_BEFORE_MINUTES = 30   # Gửi thông báo trước 30 phút so với hạn chót
 
 def check_tasks():
-    """
-    Hàm chính để kiểm tra các công việc sắp hết hạn.
-    Hàm này được gọi định kỳ bởi vòng lặp ở dưới.
-    """
     # In ra thời gian hiện tại để biết kịch bản vẫn đang chạy
-    print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Bắt đầu kiểm tra công việc...")
+    print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Checking for upcoming tasks...")
     
     # Khởi tạo đối tượng quản lý database
     db = DBManager()
@@ -40,7 +36,7 @@ def check_tasks():
     try:
         icon_path = resource_path("TaskFlowLogo.ico")
     except Exception:
-        print(" - Không tìm thấy file icon, sẽ gửi thông báo không có icon.")
+        print("Icon file not found. Using default icon.")
 
     # Đường dẫn đến file log để lưu lại các task đã được thông báo
     notified_file = resource_path("notified_tasks.log")
@@ -54,56 +50,40 @@ def check_tasks():
         # Nếu file log không tồn tại, tạo một tập hợp rỗng
         notified_ids_today = set()
 
-    print(f" - Ngày hôm nay: {today.isoformat()}")
-    # Lấy tất cả các công việc của ngày hôm nay từ database
     tasks_today = db.get_tasks_by_date(today)
-    print(f" - Tìm thấy {len(tasks_today)} công việc cho ngày hôm nay.")
 
     # Lặp qua từng công việc để kiểm tra
     for task in tasks_today:
-        print(f"\n--- Đang xử lý task: '{task.title}' (ID: {task.id}) ---")
-        print(f"   + Trạng thái hoàn thành: {task.completed}")
-        print(f"   + Đã thông báo hôm nay chưa: {task.id in notified_ids_today}")
-
-        # Bỏ qua nếu công việc đã hoàn thành hoặc đã được thông báo
         if task.completed or task.id in notified_ids_today:
-            print("   -> Bỏ qua task này.")
             continue
 
-        # Lấy thời gian hiện tại và thời gian kết thúc của công việc
+        # --- THAY ĐỔI: Sử dụng thời gian thông báo của từng task ---
+        notify_before_minutes = task.notification_time
+        # Bỏ qua nếu người dùng đặt thời gian là 0
+        if notify_before_minutes == 0:
+            continue
+        
         now_dt = datetime.now()
         end_dt = datetime.combine(today, task.end_time)
-        
-        # Tính toán khoảng thời gian còn lại
         time_until_end = end_dt - now_dt
         
-        print(f"   + Thời gian hiện tại: {now_dt.strftime('%H:%M:%S')}")
-        print(f"   + Thời gian kết thúc: {end_dt.strftime('%H:%M:%S')}")
-        print(f"   + Thời gian còn lại: {time_until_end}")
-
-        # Kiểm tra xem thời gian còn lại có nằm trong khoảng thông báo hay không
-        if timedelta(minutes=0) < time_until_end <= timedelta(minutes=NOTIFY_BEFORE_MINUTES):
-            print("   !!! ĐIỀU KIỆN THÔNG BÁO ĐƯỢC THỎA MÃN. Đang gửi thông báo...")
+        # Kiểm tra nếu thời gian còn lại <= thời gian người dùng đã chọn
+        if timedelta(minutes=0) < time_until_end <= timedelta(minutes=notify_before_minutes):
             try:
-                # Gửi thông báo trên Windows
                 notification.notify(
                     title=f"Task Ending Soon: {task.title}",
                     message=f"This task is due at {task.end_time.strftime('%H:%M')}.",
                     app_name="Task Flow",
                     app_icon=icon_path,
-                    timeout=10 # Thông báo hiển thị trong 10 giây
+                    timeout=10
                 )
-                print(f"   +++ Gửi thông báo THÀNH CÔNG cho task: '{task.title}'")
+                print(f"Sent notification for task: '{task.title}'")
                 
-                # Ghi lại ID của task đã thông báo vào file log để không gửi lại
                 with open(notified_file, 'a') as f:
                     f.write(f"{today.isoformat()}:{task.id}\n")
             except Exception as e:
-                print(f"   --- LỖI khi gửi thông báo cho task: {e}")
-        else:
-            print("   -> Chưa đến giờ thông báo.")
-
-    # Đóng kết nối database sau khi kiểm tra xong
+                print(f"ERROR sending notification: {e}")
+    
     db.close()
 
 # Đoạn code này chỉ chạy khi bạn thực thi file notifier.py trực tiếp
