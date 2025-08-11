@@ -45,18 +45,18 @@ class AddTaskWindow(QDialog):
             self.start_time_input.setTime(QTime.currentTime())
             self.end_time_input.setTime(QTime.currentTime().addSecs(3600))
         
-        # Thêm nhãn và ô nhập liệu cho mô tả
-        layout.addWidget(BodyLabel("Description:"))
-        self.description_input = TextEdit()
-        self.description_input.setPlaceholderText("Enter a description...")
-        layout.addWidget(self.description_input)
-
         # Thêm nhãn và ô nhập liệu cho thời gian thông báo
         layout.addWidget(BodyLabel("Notify me (minutes before end time):"))
         self.notification_time_input = SpinBox()
         self.notification_time_input.setRange(0, 1440) # Cho phép từ 0 đến 24 giờ
         self.notification_time_input.setValue(30) # Giá trị mặc định là 30 phút
         layout.addWidget(self.notification_time_input)
+
+        # Thêm nhãn và ô nhập liệu cho mô tả
+        layout.addWidget(BodyLabel("Description:"))
+        self.description_input = TextEdit()
+        self.description_input.setPlaceholderText("Enter a description...")
+        layout.addWidget(self.description_input)
 
         # Tạo layout ngang cho các nút bấm
         button_layout = QHBoxLayout()

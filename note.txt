@@ -1,4 +1,4 @@
-PyInstaller:
+PyInstaller (add db)
 - TaskFlow.exe
 python -m PyInstaller --name "TaskFlow" --windowed --add-data "taskflow.db;." --add-data "TaskFlowLogo.ico;." --icon="TaskFlowLogo.ico" --hidden-import="plyer.platforms.win.notification" --hidden-import="win32com" --hidden-import="psutil" main.py
 - notifier.exe

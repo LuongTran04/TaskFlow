@@ -43,13 +43,6 @@ class EditTaskWindow(QDialog):
         self.end_time_input.setTime(QTime(task.end_time.hour, task.end_time.minute))
         layout.addWidget(self.end_time_input)
 
-        # Thêm nhãn và ô nhập liệu cho mô tả
-        layout.addWidget(BodyLabel("Description:"))
-        self.desc_input = TextEdit()
-        # Hiển thị mô tả hiện tại của task lên ô nhập liệu
-        self.desc_input.setText(task.description)
-        layout.addWidget(self.desc_input)
-
         # Ô nhập thời gian thông báo 
         layout.addWidget(BodyLabel("Notify me (minutes before end time):"))
         self.notification_time_input = SpinBox()
@@ -57,6 +50,13 @@ class EditTaskWindow(QDialog):
         # Đặt giá trị hiện tại của task vào ô
         self.notification_time_input.setValue(task.notification_time)
         layout.addWidget(self.notification_time_input)
+
+        # Thêm nhãn và ô nhập liệu cho mô tả
+        layout.addWidget(BodyLabel("Description:"))
+        self.desc_input = TextEdit()
+        # Hiển thị mô tả hiện tại của task lên ô nhập liệu
+        self.desc_input.setText(task.description)
+        layout.addWidget(self.desc_input)
 
         # Tạo layout ngang cho các nút bấm
         button_layout = QHBoxLayout()
