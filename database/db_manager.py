@@ -132,3 +132,32 @@ class DBManager:
 
     def close(self):
         self.conn.close()
+
+    def get_all_tasks_stats(self):
+        """Lấy thống kê tổng số task, số task đã hoàn thành và chưa hoàn thành."""
+        query = "SELECT COUNT(id), SUM(completed) FROM tasks"
+        cursor = self.conn.cursor()
+        cursor.execute(query)
+        total_tasks, completed_tasks = cursor.fetchone()
+
+        # Xử lý trường hợp database trống
+        if total_tasks is None or total_tasks == 0:
+            return {"total": 0, "completed": 0, "incomplete": 0}
+        
+        if completed_tasks is None:
+            completed_tasks = 0
+
+        incomplete_tasks = total_tasks - completed_tasks
+        return {
+            "total": total_tasks,
+            "completed": completed_tasks,
+            "incomplete": incomplete_tasks
+        }
+    
+    def get_recent_tasks(self, limit=4):
+        """Lấy một số lượng giới hạn các công việc được thêm vào gần đây nhất."""
+        # Đảm bảo câu lệnh SELECT lấy cả 'description'
+        query = "SELECT title, description, completed FROM tasks ORDER BY id DESC LIMIT ?"
+        cursor = self.conn.cursor()
+        cursor.execute(query, (limit,))
+        return cursor.fetchall()

@@ -68,7 +68,8 @@ def check_tasks():
         time_until_end = end_dt - now_dt
         
         # Kiểm tra nếu thời gian còn lại <= thời gian người dùng đã chọn
-        if timedelta(minutes=0) < time_until_end <= timedelta(minutes=notify_before_minutes):
+        lower_bound = timedelta(minutes=notify_before_minutes) - timedelta(seconds=CHECK_INTERVAL_SECONDS)
+        if lower_bound < time_until_end <= timedelta(minutes=notify_before_minutes):
             try:
                 notification.notify(
                     title=f"Task Ending Soon: {task.title}",
