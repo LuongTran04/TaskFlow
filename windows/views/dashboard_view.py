@@ -54,24 +54,13 @@ class DashboardView(QWidget):
 
         # Stats Cards
         stats_layout = QHBoxLayout()
-        self.total_card = self.create_stat_card("Total Tasks", "0", "#3B82F6")
         self.completed_card = self.create_stat_card("Completed", "0", "#10B981")
         self.incomplete_card = self.create_stat_card("Incomplete", "0", "#EF4444")
-        stats_layout.addWidget(self.total_card)
+        self.total_card = self.create_stat_card("Total Tasks", "0", "#3B82F6")
         stats_layout.addWidget(self.completed_card)
         stats_layout.addWidget(self.incomplete_card)
+        stats_layout.addWidget(self.total_card)
         self.layout.addLayout(stats_layout)
-
-        # Set màu nền cho từng card
-        self.completed_card.findChild(QFrame, "ContentWidget").setStyleSheet(
-            "#ContentWidget { background-color: #ECFDF5; border-radius: 12px; padding: 15px; }"
-        )
-        self.incomplete_card.findChild(QFrame, "ContentWidget").setStyleSheet(
-            "#ContentWidget { background-color: #FEE2E2; border-radius: 12px; padding: 15px; }"
-        )
-        self.total_card.findChild(QFrame, "ContentWidget").setStyleSheet(
-            "#ContentWidget { background-color: #DBEAFE; border-radius: 12px; padding: 15px; }"
-        )
 
         # Chart Section
         chart_content, chart_container = self.create_shadow_frame()
@@ -191,15 +180,14 @@ class DashboardView(QWidget):
         # --- ĐỊNH NGHĨA MÀU SẮC DỰA TRÊN TRẠNG THÁI ---
         bg_color = ""
         text_title_color = ""
+        text_desc_color = "#64748B" # Màu mô tả chung
         
         if is_completed:
             bg_color = "#ECFDF5"  # Xanh lá nhạt
-            text_title_color = "#10B981" # Tiêu đề xanh lá
-            text_desc_color = "#10B981"
+            text_title_color = "#10B981" # Tiêu đề cũng xanh lá
         else:
             bg_color = "#FFFBEB"  # Vàng nhạt
-            text_title_color = "#F59E0B" # Tiêu đề vàng cam
-            text_desc_color = "#F59E0B"
+            text_title_color = "#F59E0B" # Tiêu đề cũng vàng cam
 
         item.setStyleSheet(f"""
             QFrame {{
@@ -213,19 +201,23 @@ class DashboardView(QWidget):
         layout.setContentsMargins(8, 5, 5, 5) # Tăng lề trái để có khoảng cách với border-left
 
         # Sử dụng HTML để định dạng text
-        description_text = description if description else "n/a"
-        html_text = (
-            f"<span>"
-            f"<b style='color: {text_title_color};'>Title: {title}</b> "
-            f"<b style='color: {text_desc_color};'>- Description: {description_text}</b>"
-            f"</span>"
-        )
+        description_text = description if description else ""
+        html_text = f"<b style='color: {text_title_color};'>{title}</b><br><span style='color: {text_desc_color};'>{description_text}</span>"
         
         task_label = QLabel(html_text)
         task_label.setWordWrap(True)
         task_label.setAlignment(Qt.AlignTop)
         task_label.setFont(QFont("Segoe UI", 10)) # Đặt font cho label
 
+        # Thêm hiệu ứng gạch ngang nếu task đã hoàn thành
+        if is_completed:
+            font = task_label.font()
+            font.setStrikeOut(True)
+            task_label.setFont(font)
+            # Không cần set màu riêng cho task_label nếu màu đã được định nghĩa trong HTML và CSS
+            # hoặc để đảm bảo, có thể ghi đè lại nếu cần thiết
+            # task_label.setStyleSheet(f"color: {text_title_color}; background-color: transparent;") 
+        
         layout.addWidget(task_label)
 
         return item

@@ -5,12 +5,11 @@ import os
 import subprocess
 import psutil
 from PySide6.QtWidgets import QApplication
-
-# Import các thành phần của ứng dụng
 from windows.main_window import MainWindow 
 from qfluentwidgets import setTheme, Theme
+from utils.config import config # <-- THÊM DÒNG NÀY
 
-# Các hàm is_running_as_exe, get_application_path, etc.
+# Các hàm is_running_as_exe, get_application_path, is_process_running, setup_auto_start, start_notifier_if_not_running giữ nguyên như cũ
 def is_running_as_exe():
     return getattr(sys, 'frozen', False)
 
@@ -46,12 +45,10 @@ def setup_auto_start(app_path):
         print(f"Không thể tạo shortcut khởi động: {e}")
 
 def start_notifier_if_not_running(app_path):
-    notifier_exe_path = os.path.join(app_path, "notifier.exe")
-    if os.path.exists(notifier_exe_path) and not is_process_running("notifier.exe"):
-        try:
+    if not is_process_running("notifier.exe"):
+        notifier_exe_path = os.path.join(app_path, "notifier.exe")
+        if os.path.exists(notifier_exe_path):
             subprocess.Popen([notifier_exe_path], creationflags=subprocess.DETACHED_PROCESS, close_fds=True)
-        except Exception as e:
-            print(f"Cannot start notifier: {e}")
 
 def main():
     if sys.platform == 'win32':
@@ -67,8 +64,9 @@ def main():
         setup_auto_start(app_path)
         start_notifier_if_not_running(app_path)
 
-    # Luôn đặt theme là Sáng (Light)
-    setTheme(Theme.LIGHT)
+    # Đọc theme từ file cài đặt và áp dụng khi khởi động
+    current_theme = config.get("theme")
+    setTheme(Theme.LIGHT if current_theme == "Light" else Theme.DARK)
 
     window = MainWindow()
     window.show()
