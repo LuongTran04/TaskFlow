@@ -10,10 +10,7 @@ from PySide6.QtCore import QTimer
 # Import các view
 from windows.views.calendar_view import CalendarView
 from windows.views.dashboard_view import DashboardView
-from windows.views.settings_view import SettingsView
 
-# Import config
-from utils.config import config
 
 # Hàm helper để lấy đường dẫn tài nguyên
 def resource_path(relative_path):
@@ -53,12 +50,10 @@ class MainWindow(QMainWindow):
         # Khởi tạo các trang con (view)
         self.calendar_view = CalendarView(self)
         self.dashboard_view = DashboardView(self)
-        self.settings_view = SettingsView(self)
         
         # Thêm các trang vào QStackedWidget
         self.stacked_widget.addWidget(self.calendar_view)
         self.stacked_widget.addWidget(self.dashboard_view)
-        self.stacked_widget.addWidget(self.settings_view)
 
         # Thêm các nút bấm vào thanh điều hướng
         self.add_navigation_items()
@@ -78,17 +73,9 @@ class MainWindow(QMainWindow):
         )
         self.navigation_interface.addItem(
             routeKey='dashboard_view',
-            icon=FluentIcon.HOME,
+            icon=FluentIcon.DOCUMENT,
             text='Dashboard',
             onClick=self.on_dashboard_clicked
-        )
-        
-        # --- SỬA LẠI: Di chuyển nút Settings lên đây và bỏ position ---
-        self.navigation_interface.addItem(
-            routeKey='settings_view',
-            icon=FluentIcon.SETTING,
-            text='Settings',
-            onClick=lambda: self.stacked_widget.setCurrentWidget(self.settings_view)
         )
         
         # Đặt trang Calendar làm trang mặc định
@@ -112,11 +99,6 @@ class MainWindow(QMainWindow):
     def check_upcoming_tasks(self):
         """Kiểm tra và gửi thông báo."""
         from PySide6.QtCore import QDate, QTime
-
-        if not config.get("notifications_enabled"):
-            if self.notification_timer.isActive():
-                self.notification_timer.stop()
-            return
         
         if not self.notification_timer.isActive():
             self.notification_timer.start(60000)
@@ -150,4 +132,4 @@ class MainWindow(QMainWindow):
                     )
                     self.notified_tasks_today.add(task.id)
                 except Exception as e:
-                    print(f"Lỗi khi gửi thông báo: {e}")
+                    print(f"Error while sending notification: {e}")

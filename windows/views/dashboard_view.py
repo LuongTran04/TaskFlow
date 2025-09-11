@@ -54,12 +54,12 @@ class DashboardView(QWidget):
 
         # Stats Cards
         stats_layout = QHBoxLayout()
-        self.completed_card = self.create_stat_card("Completed", "0", "#10B981")
-        self.incomplete_card = self.create_stat_card("Incomplete", "0", "#EF4444")
-        self.total_card = self.create_stat_card("Total Tasks", "0", "#3B82F6")
+        self.completed_card = self.create_stat_card("Completed", "0", "#10B981", "#ECFDF5")      # Xanh lá nhạt
+        self.incomplete_card = self.create_stat_card("Incomplete", "0", "#EF4444", "#FFFBEB")    # Vàng nhạt
+        self.total_card = self.create_stat_card("Total Tasks", "0", "#3B82F6", "#DBEAFE")      # Xanh dương nhạt
+        stats_layout.addWidget(self.total_card)
         stats_layout.addWidget(self.completed_card)
         stats_layout.addWidget(self.incomplete_card)
-        stats_layout.addWidget(self.total_card)
         self.layout.addLayout(stats_layout)
 
         # Chart Section
@@ -154,10 +154,15 @@ class DashboardView(QWidget):
         container_layout.addWidget(content_widget)
         return content_widget, container
 
-    def create_stat_card(self, title, initial_value, accent_color):
+    def create_stat_card(self, title, initial_value, accent_color, bg_color="#fff"):
         """Tạo một thẻ thống kê có đổ bóng."""
         content_widget, container = self.create_shadow_frame()
         card_layout = QVBoxLayout(content_widget)
+
+        content_widget.setStyleSheet(
+            f"#ContentWidget {{ background-color: {bg_color}; border-radius: 12px; padding: 15px; }}"
+        )
+
         
         title_label = QLabel(title)
         title_label.setFont(QFont("Segoe UI", 10))
@@ -180,7 +185,6 @@ class DashboardView(QWidget):
         # --- ĐỊNH NGHĨA MÀU SẮC DỰA TRÊN TRẠNG THÁI ---
         bg_color = ""
         text_title_color = ""
-        text_desc_color = "#64748B" # Màu mô tả chung
         
         if is_completed:
             bg_color = "#ECFDF5"  # Xanh lá nhạt
@@ -201,22 +205,18 @@ class DashboardView(QWidget):
         layout.setContentsMargins(8, 5, 5, 5) # Tăng lề trái để có khoảng cách với border-left
 
         # Sử dụng HTML để định dạng text
-        description_text = description if description else ""
-        html_text = f"<b style='color: {text_title_color};'>{title}</b><br><span style='color: {text_desc_color};'>{description_text}</span>"
+        description_text = description if description else "n/a"
+        html_text = (
+            f"<span>"
+            f"<b style='color: {text_title_color};'>Title: {title}</b> "
+            f"<b style='color: {text_title_color};'>- Description: {description_text}</b>"
+            f"</span>"
+        )
         
         task_label = QLabel(html_text)
         task_label.setWordWrap(True)
         task_label.setAlignment(Qt.AlignTop)
         task_label.setFont(QFont("Segoe UI", 10)) # Đặt font cho label
-
-        # Thêm hiệu ứng gạch ngang nếu task đã hoàn thành
-        if is_completed:
-            font = task_label.font()
-            font.setStrikeOut(True)
-            task_label.setFont(font)
-            # Không cần set màu riêng cho task_label nếu màu đã được định nghĩa trong HTML và CSS
-            # hoặc để đảm bảo, có thể ghi đè lại nếu cần thiết
-            # task_label.setStyleSheet(f"color: {text_title_color}; background-color: transparent;") 
         
         layout.addWidget(task_label)
 
