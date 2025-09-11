@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import time
+from typing import List
 
 @dataclass
 class Task:
@@ -8,5 +9,6 @@ class Task:
     end_time: time
     description: str = ""
     completed: bool = False
-    id: int = None 
+    id: int = None
     notification_time: int = 30
+    attachments: List[str] = field(default_factory=list)
