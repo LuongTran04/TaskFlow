@@ -1,6 +1,6 @@
 ## TaskFlow - Daily Planner 
 
-TaskFlow is a daily task and time management application, designed to help users optimize personal productivity through the time allocation method (Calendar Blocking). The application provides an intuitive, easy-to-use interface and has been refined, packaged ready for release on the Microsoft Store platform.
+TaskFlow is a daily task and time management application, designed to help users optimize personal productivity through the time allocation method (Calendar Blocking). The application provides an intuitive, easy-to-use interface.
 
 ## Features
 
